@@ -1,20 +1,17 @@
 import "./App.css";
-import { A, Route, Router, type RouteSectionProps } from "@solidjs/router";
-
-function Home() {
-  return (
-    <div>
-      <h1>Home</h1>
-    </div>
-  );
-}
+import { Route, Router, type RouteSectionProps } from "@solidjs/router";
+import Home from "./pages/home";
+import Header from "./components/header/Header";
+import Footer from "./components/footer/Footer";
 
 function Root(props: RouteSectionProps) {
   return (
-    <div>
-      <A href="/">Home</A>
-      <A href="/about">About</A>
-      {props.children}
+    <div class="flex flex-col min-h-screen">
+      <Header />
+      <main class="flex-grow">
+        {props.children}
+      </main>
+      <Footer />
     </div>
   );
 }
@@ -23,7 +20,6 @@ function App() {
   return (
     <Router root={Root}>
       <Route path="/" component={Home} />
-      <Route path="/about" component={() => <div>About</div>} />
     </Router>
   );
 }

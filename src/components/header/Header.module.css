@@ -1,0 +1,142 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: var(--bg-dark);
+  background-color: rgba(10, 10, 10, 0.9);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  padding: 1rem;
+  width: 100%;
+}
+
+.container {
+  width: 100%;
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.logoLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: opacity 150ms ease-in-out;
+}
+
+.logoLink:hover {
+  opacity: 0.9;
+}
+
+.logoIcon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--accent-color);
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-white);
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .logoText {
+    display: block;
+  }
+}
+
+.nav {
+  display: none;
+  align-items: center;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .nav {
+    display: flex;
+  }
+}
+
+.navLink {
+  color: var(--text-light);
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: color 150ms ease-in-out;
+}
+
+.navLink:hover {
+  color: var(--accent-color);
+}
+
+.navLinkActive {
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.authContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.loginButton {
+  display: none;
+  color: var(--text-light);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: color 150ms ease-in-out;
+}
+
+.loginButton:hover {
+  color: var(--accent-color);
+}
+
+@media (min-width: 640px) {
+  .loginButton {
+    display: block;
+  }
+}
+
+.signupButton {
+  background-color: var(--accent-color);
+  color: var(--text-white);
+  font-weight: 500;
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  transition: background-color 150ms ease-in-out;
+}
+
+.signupButton:hover {
+  background-color: var(--accent-hover);
+}
+
+@media (min-width: 640px) {
+  .signupButton {
+    font-size: 1rem;
+  }
+}
