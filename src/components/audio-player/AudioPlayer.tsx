@@ -1,9 +1,11 @@
-import { onCleanup, createSignal, type Component, Show } from 'solid-js';
+import { onCleanup, createSignal, type Component, Show, createEffect, on } from 'solid-js';
 import WaveSurfer from 'wavesurfer.js';
 
 interface AudioPlayerProps {
   url: string;
 }
+
+const CACHE_NAME = 'audio-cache';
 
 const AudioPlayer: Component<AudioPlayerProps> = (props) => {
   let wavesurfer: WaveSurfer;
@@ -12,6 +14,20 @@ const AudioPlayer: Component<AudioPlayerProps> = (props) => {
   const [isPlaying, setIsPlaying] = createSignal(false);
   const [duration, setDuration] = createSignal('0:00');
   const [isLoaded, setIsLoaded] = createSignal(false);
+  const [audioSrc, setAudioSrc] = createSignal<string>();
+
+  createEffect(on(() => props.url, async (url) => {
+    if (url) {
+      const cache = await caches.open(CACHE_NAME);
+      const response = await cache.match(url);
+      if (response) {
+        const blob = await response.blob();
+        setAudioSrc(URL.createObjectURL(blob));
+      } else {
+        setAudioSrc(url);
+      }
+    }
+  }));
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -55,6 +71,9 @@ const AudioPlayer: Component<AudioPlayerProps> = (props) => {
     if (wavesurfer) {
       wavesurfer.destroy();
     }
+    if (audioSrc() && audioSrc().startsWith('blob:')) {
+      URL.revokeObjectURL(audioSrc());
+    }
   });
 
   const handlePlayPause = () => {
@@ -64,8 +83,8 @@ const AudioPlayer: Component<AudioPlayerProps> = (props) => {
   };
 
   const handleLoad = () => {
-    if (wavesurfer) {
-      wavesurfer.load(props.url);
+    if (wavesurfer && audioSrc()) {
+      wavesurfer.load(audioSrc());
     }
   };
 
@@ -73,7 +92,7 @@ const AudioPlayer: Component<AudioPlayerProps> = (props) => {
     <div class="bg-secondary p-4 rounded-lg shadow-lg">
       <audio
         ref={audioRef}
-        src={props.url}
+        src={audioSrc()}
       />
       <div ref={waveformRef} class="mb-4" />
       <Show

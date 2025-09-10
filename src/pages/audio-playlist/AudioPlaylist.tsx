@@ -1,6 +1,7 @@
 import { useParams } from "@solidjs/router";
-import { createResource, For, Show } from "solid-js";
+import { createResource, For, Show, createSignal, onMount } from "solid-js";
 import AudioPlayer from "../../components/audio-player/AudioPlayer";
+import CacheWorker from '../../workers/cache-worker?worker';
 
 interface Track {
   title: string;
@@ -47,6 +48,33 @@ const fetchAudiobook = async (identifier: string): Promise<Audiobook> => {
 const AudioPlaylist = () => {
   const params = useParams();
   const [audiobook] = createResource(() => params.bookId, fetchAudiobook);
+  const [cachedTracks, setCachedTracks] = createSignal<Set<string>>(new Set());
+  const [downloadingTracks, setDownloadingTracks] = createSignal<Set<string>>(new Set());
+
+  let worker: Worker;
+
+  onMount(() => {
+    worker = new CacheWorker();
+
+    worker.onmessage = (event) => {
+      const { type, url } = event.data;
+      if (type === 'cached') {
+        setDownloadingTracks(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(url);
+          return newSet;
+        });
+        setCachedTracks(prev => new Set(prev).add(url));
+      } else if (type === 'already-cached') {
+        setCachedTracks(prev => new Set(prev).add(url));
+      }
+    };
+  });
+
+  const downloadTrack = (track: Track) => {
+    setDownloadingTracks(prev => new Set(prev).add(track.url));
+    worker.postMessage({ url: track.url, title: track.title });
+  };
 
   return (
     <div class="container mx-auto px-4 py-8">
@@ -86,8 +114,8 @@ const AudioPlaylist = () => {
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <For each={book().playlist}>
                 {(track) => (
-                  <div class="bg-secondary p-4 rounded-lg shadow-lg flex flex-col items-start justify-between gap-4">
-                    <div class="">
+                  <div class="bg-secondary p-4 rounded-lg shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex-1 min-w-0">
                       <h3 class="text-lg font-semibold mb-1 truncate">
                         {track.track}. {track.title}
                       </h3>
@@ -97,8 +125,22 @@ const AudioPlaylist = () => {
                           {(Number(track.size) / 1024 / 1024).toFixed(2)} MB
                         </span>
                       </div>
+                      <button
+                        onClick={() => downloadTrack(track)}
+                        disabled={
+                          cachedTracks().has(track.url) ||
+                          downloadingTracks().has(track.url)
+                        }
+                        class="btn btn-primary p-3"
+                      >
+                        {cachedTracks().has(track.url)
+                          ? "Cached"
+                          : downloadingTracks().has(track.url)
+                          ? "Downloading..."
+                          : "Download"}
+                      </button>
                     </div>
-                    <div class="w-full">
+                    <div class="w-full sm:w-1/2 md:w-1/3 flex items-center gap-2">
                       <AudioPlayer url={track.url} />
                     </div>
                   </div>
