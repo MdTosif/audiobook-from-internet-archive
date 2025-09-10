@@ -1,35 +1,23 @@
-// src/workers/cache-worker.ts
-
-const CACHE_NAME = 'audio-cache';
-
-self.addEventListener('message', (event) => {
+self.addEventListener('message', async (event) => {
   const { type, url } = event.data;
 
-  if (type === 'get-cached-urls') {
-    caches.open(CACHE_NAME).then((cache) => {
-      cache.keys().then((keys) => {
-        const urls = keys.map((request) => request.url);
-        self.postMessage({ type: 'cached-urls', urls });
-      });
-    });
-  } else if (type === 'cache-track' && url) {
-    caches.open(CACHE_NAME).then((cache) => {
-      cache.match(url).then((response) => {
-        if (!response) {
-          fetch(url)
-            .then((res) => {
-              if (res.ok) {
-                cache.put(url, res.clone());
-                self.postMessage({ type: 'cached', url });
-              }
-            })
-            .catch((err) => {
-              console.error('Failed to cache audio:', err);
-            });
-        } else {
-          self.postMessage({ type: 'already-cached', url });
-        }
-      });
-    });
+  if (type === 'cache-track') {
+    try {
+      const cache = await caches.open('audio-cache');
+      const response = await cache.match(url);
+      if (response) {
+        self.postMessage({ type: 'already-cached', url });
+      } else {
+        await cache.add(url);
+        self.postMessage({ type: 'cached', url });
+      }
+    } catch (error) {
+      // self.postMessage({ type: 'CACHE_ERROR', url, error }); // Maybe add error handling later
+    }
+  } else if (type === 'cached-urls') {
+    const cache = await caches.open('audio-cache');
+    const requests = await cache.keys();
+    const urls = requests.map(req => req.url);
+    self.postMessage({ type: 'cached-urls', urls });
   }
 });

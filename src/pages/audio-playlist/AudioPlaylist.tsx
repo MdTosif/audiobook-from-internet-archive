@@ -56,24 +56,33 @@ const AudioPlaylist = () => {
   onMount(() => {
     worker = new CacheWorker();
 
+    worker.postMessage({ type: "cached-urls" });
+
     worker.onmessage = (event) => {
-      const { type, url } = event.data;
-      if (type === 'cached') {
-        setDownloadingTracks(prev => {
+      const { type, url, urls } = event.data;
+      if (type === "cached") {
+        setDownloadingTracks((prev) => {
           const newSet = new Set(prev);
           newSet.delete(url);
           return newSet;
         });
-        setCachedTracks(prev => new Set(prev).add(url));
-      } else if (type === 'already-cached') {
-        setCachedTracks(prev => new Set(prev).add(url));
+        setCachedTracks((prev) => new Set(prev).add(url));
+      } else if (type === "already-cached") {
+        setDownloadingTracks((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(url);
+          return newSet;
+        });
+        setCachedTracks((prev) => new Set(prev).add(url));
+      } else if (type === "cached-urls") {
+        setCachedTracks(new Set(urls as string[]));
       }
     };
   });
 
   const downloadTrack = (track: Track) => {
     setDownloadingTracks(prev => new Set(prev).add(track.url));
-    worker.postMessage({ url: track.url, title: track.title });
+    worker.postMessage({ type: "cache-track", url: track.url });
   };
 
   return (

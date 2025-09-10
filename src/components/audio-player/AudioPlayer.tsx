@@ -71,8 +71,9 @@ const AudioPlayer: Component<AudioPlayerProps> = (props) => {
     if (wavesurfer) {
       wavesurfer.destroy();
     }
-    if (audioSrc() && audioSrc().startsWith('blob:')) {
-      URL.revokeObjectURL(audioSrc());
+    const aSrc = audioSrc()
+    if (aSrc && aSrc?.startsWith('blob:') && aSrc !== undefined) {
+      URL.revokeObjectURL(aSrc);
     }
   });
 
@@ -83,8 +84,10 @@ const AudioPlayer: Component<AudioPlayerProps> = (props) => {
   };
 
   const handleLoad = () => {
-    if (wavesurfer && audioSrc()) {
-      wavesurfer.load(audioSrc());
+    const aSrc = audioSrc();
+
+    if (wavesurfer && aSrc) {
+      wavesurfer.load(aSrc);
     }
   };
 

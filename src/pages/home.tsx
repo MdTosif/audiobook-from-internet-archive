@@ -9,7 +9,7 @@ const Home = () => {
       </p>
       <A href="audiobook/art_of_war_librivox">
         <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          Get Started
+          Art of war 
         </button>
       </A>
     </div>
