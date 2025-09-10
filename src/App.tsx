@@ -1,8 +1,8 @@
-import "./App.css";
 import { Route, Router, type RouteSectionProps } from "@solidjs/router";
 import Home from "./pages/home";
 import Header from "./components/header/Header";
 import Footer from "./components/footer/Footer";
+import AudioPlaylist from "./components/audio-playlist/AudioPlaylist";
 
 function Root(props: RouteSectionProps) {
   return (
@@ -20,6 +20,7 @@ function App() {
   return (
     <Router root={Root}>
       <Route path="/" component={Home} />
+      <Route path="/audiobook/:bookId" component={AudioPlaylist} />
     </Router>
   );
 }
